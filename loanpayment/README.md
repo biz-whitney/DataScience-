@@ -1,0 +1,1 @@
+With five colleagues, developed unbiased models with higher accuracy to predict if an individual will default on their loan payment using Lending-Club data set. We presented our finding that it is possible to train highly effective models without using demographic features.
