@@ -4,4 +4,4 @@ Here are some data science and machine learning projects and [kaggle](https://ww
 
 1. [Categorizing Black Friday Products](https://github.com/biz-whitney/DataScience-/tree/master/blackfriday) <br />
 2. [Classifying Emails](https://github.com/biz-whitney/DataScience-/tree/master/classifyemails) <br />
-3. [Unbiased Prediction of Loan Repayment](https://github.com/biz-whitney/DataScience-/tree/master/loanpayment)
+3. [Unbiased Prediction of Loan Repayment](https://github.com/biz-whitney/DataScience-/tree/master/Unbiased%20Prediction%20of%20Loan%20Repayment%20)
