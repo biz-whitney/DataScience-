@@ -1,0 +1,176 @@
+---
+title: "random_forest"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{R, include=TRUE}
+library(data.table)
+df = fread("Desktop/clean_lending_dataset.csv")
+#get rid of unnecessary column as well as employment
+df = df[,-c(1, 2)]
+head(df)
+colnames(df)
+```
+
+```{R, include=TRUE}
+#combining grade, sub_grades, terms, home_ownership into respective columns because R's random forest is able to pick out splits in categorical variables 
+grade_cols = colnames(df)[15:21]
+sub_grade_cols = colnames(df)[22:56]
+term_cols = colnames(df)[57:58]
+home_ownership_cols = colnames(df)[59:64]
+
+df[,"grade"] = grade_cols[apply(df[,15:21], 1, which.max)]
+df[,"subgrade"] = sub_grade_cols[apply(df[,22:56], 1, which.max)]
+df[,"term"] = term_cols[apply(df[,57:58], 1, which.max)]
+df[, "home_ownership"] = home_ownership_cols[apply(df[,59:64], 1, which.max)]
+
+df = df[,-c(15:64)]
+head(df)
+df[is.na(df)] = -1
+df[,"loan_status"] = apply(df[,"loan_status"], 1, as.factor)
+
+set.seed(1350)
+sampled = df[sample(1:nrow(df)),]
+train = sampled[1:100000,]
+val = sampled[100001:110000,]
+test = sampled[110001:120000,]
+```
+
+```{R, include=TRUE}
+library(ranger) #fast implementation of random forest
+
+#figuring out how many columns to use when deciding splits, using default number of trees of 500 and splitting by gini index
+
+#seq5 = seq(1, 25, 5)
+#recall5 = c()
+#accuracy5 = c()
+
+#set.seed(1350)
+#for (i in seq5){
+#  print(i)
+#  rf = ranger(loan_status ~., data = train, mtry = i, importance = "impurity", seed = 1350)
+#  prediction = predict(rf, val)$predictions
+#  recall_table = table(val$loan_status, prediction)
+#  accuracy5 = c(accuracy5, sum(val$loan_status == prediction)/nrow(val))
+#  recall5 = c(recall5, recall_table[4]/(recall_table[2] + recall_table[4]))
+#}
+
+#seq5[which.max(accuracy5)]
+#seq5[which.max(recall5)]
+
+#highest accuracy and recall score was both with mtry = 21
+```
+
+```{R, include = TRUE}
+#seq1 = seq(17, 25, 1)
+#recall1 = c()
+#accuracy1 = c()
+
+#set.seed(1350)
+#for (i in seq1){
+#  print(i)
+#  rf = ranger(loan_status ~., data = train, mtry = i, importance = "impurity", seed = 1350)
+#  prediction = predict(rf, val)$predictions
+#  recall_table = table(val$loan_status, prediction)
+#  accuracy1 = c(accuracy1, sum(val$loan_status == prediction)/nrow(val))
+#  recall1 = c(recall1, recall_table[4]/(recall_table[2] + recall_table[4]))
+#}
+
+#seq1[which.max(accuracy1)]
+#seq1[which.max(recall1)]
+
+#highest accuracy and recall was both with mtry = 25
+```
+
+```{R, include = TRUE}
+rf = ranger(loan_status ~ ., data = train, mtry = 25, importance = "impurity", seed = 1350)
+prediction = predict(rf, test)$predictions
+recall_table = table(test$loan_status, prediction)
+sum(test$loan_status == prediction)/nrow(test)
+recall_table[4]/(recall_table[2] + recall_table[4])
+sort(importance(rf), decreasing = TRUE)[1:10]
+```
+Biggest indication of whether a person will default or be late in their payment is how much their total payment is, which makes sense because if their total payment does not match the loan amount, then that means that they were not able to meet their repayment. 
+The loan amount seems to have the highest importance when determining whether a person will default or be late in their payment. 
+
+```{R, include = TRUE}
+train2 = train[,-c(6, 11, 13, 17, 26)]
+val2 = val[,-c(6, 11, 13, 17, 26)]
+test2 = test[, -c(6, 11, 13, 17, 26)]
+
+#seq5_2 = seq(1, 20, 5)
+#recall5_2 = c()
+#accuracy5_2 = c()
+
+#set.seed(1350)
+#for (i in seq5_2){
+#  print(i)
+#  rf2 = ranger(loan_status ~., data = train2, mtry = i, importance = "impurity", seed = 1350)
+#  prediction2 = predict(rf2, val2)$predictions
+#  recall_table2 = table(val2$loan_status, prediction2)
+#  accuracy5_2 = c(accuracy5_2, sum(val2$loan_status == prediction2)/nrow(val2))
+#  recall5_2 = c(recall5_2, recall_table2[4]/(recall_table2[2] + recall_table2[4]))
+#}
+
+#seq5_2[which.max(accuracy5_2)]
+#seq5_2[which.max(recall5_2)]
+
+#highest accuracy and recall was both with mtry = 16
+```
+
+```{R, include = TRUE}
+#seq1_2 = seq(12, 20, 1)
+#recall1_2 = c()
+#accuracy1_2 = c()
+
+#set.seed(1350)
+#for (i in seq1_2){
+#  print(i)
+#  rf2 = ranger(loan_status ~., data = train2, mtry = i, importance = "impurity", seed = 1350)
+#  prediction2 = predict(rf2, val2)$predictions
+#  recall_table2 = table(val2$loan_status, prediction2)
+#  accuracy1_2 = c(accuracy1_2, sum(val2$loan_status == prediction2)/nrow(val2))
+#  recall1_2 = c(recall1_2, recall_table2[4]/(recall_table2[2] + recall_table2[4]))
+#}
+
+#seq1_2[which.max(accuracy1_2)]
+#seq1_2[which.max(recall1_2)]
+
+#highest accuracy and recall was both with mtry = 20
+```
+
+```{R, include=TRUE}
+rf2 = ranger(loan_status ~ ., data = train2, mtry = 20, importance = "impurity", seed = 1350)
+prediction2 = predict(rf2, test2)$predictions
+recall_table2 = table(test2$loan_status, prediction2)
+sum(test2$loan_status == prediction2)/nrow(test2)
+recall_table2[4]/(recall_table2[2] + recall_table2[4])
+sort(importance(rf2), decreasing = TRUE)[1:10]
+```
+
+Variable importance is about the same as the original random forest with all the variables. The "discriminatory" variables don't actually play much of a variable when considering loan default. 
+
+```{R, include=TRUE}
+#Predicting on whole dataset
+rf_predict_all = predict(rf, df)$predictions
+recall_table_all = table(df$loan_status, rf_predict_all)
+sum(df$loan_status == rf_predict_all)/nrow(df)
+recall_table_all[4]/(recall_table_all[2] + recall_table_all[4])
+```
+
+
+```{R, include = TRUE}
+rf_predict_all2 = predict(rf2, df)$predictions
+recall_table_all2 = table(df$loan_status, rf_predict_all2)
+sum(df$loan_status == rf_predict_all2)/nrow(df)
+recall_table_all2[4]/(recall_table_all2[2] + recall_table_all2[4])
+```
+
+Actually got a higher accuracy when taking out the bias tending variable. Really indicates that the biased variables do not play a big role in determining whether a person will default and actually comes to demonstrate that stereotyping a person is not accurate. 
+
+
