@@ -1,3 +1,3 @@
 # Unbiased Prediction of Loan Repayment
 
-With five colleagues, developed unbiased models with higher accuracy to predict if an individual will default on their loan payment using Lending-Club data set. We presented our finding that it is possible to train highly effective models without using demographic features.
+With five colleagues, developed unbiased models with higher accuracy to predict if an individual will default on their loan payment using Lending-Club data set. We presented our finding that it is possible to train highly effective models without using demographic features. Here are the [write-up](https://github.com/biz-whitney/DataScience-/blob/master/Unbiased%20Prediction%20of%20Loan%20Repayment%20/Loan_default_prediction.pdf) and the [presentation slides](https://github.com/biz-whitney/DataScience-/blob/master/Unbiased%20Prediction%20of%20Loan%20Repayment%20/presentation.pdf) for more details.
